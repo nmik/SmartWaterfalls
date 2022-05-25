@@ -6,6 +6,7 @@
     # Autors: Michela Negro, GSFC/CRESST/UMBC                                      #
     #         Eric Burns, LSU                                                      #
     #         Nicolò Cibrario, University of Torino                                #
+    #         + anyone who will contribute                                         #
     #                                                                              #
     # This program is free software; you can use it and/or modify                  #
     # it under the terms of the GNU General Public License as published by         #
