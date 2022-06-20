@@ -30,6 +30,7 @@ class autoencoder(nn.Module):
         self.linear2=nn.Linear(h1, n_e)
         self.linear3=nn.Linear(n_e, h1)
         self.linear4=nn.Linear(h1, 6*xlen-in_channels*4)
+        self.unflatten=nn.Unflatten(1, (in_channels*4,1171))
         self.deconv1=nn.ConvTranspose2d(in_channels=in_channels*4, out_channels=in_channels*2, kernel_size=(2,3), stride=2, padding=0)
         self.unpool=nn.MaxUnpool2d(kernel_size=(2,3), stride=(1,2), padding=0)
         self.deconv2=nn.ConvTranspose2d(in_channels=in_channels*2, out_channels=in_channels, kernel_size=4, stride=2, padding=0)
@@ -48,8 +49,7 @@ class autoencoder(nn.Module):
 
     def decoder(self,x):
         x=self.linear4(self.linear3(x))
-
-        x=torch.reshape(x, (12*4,1171)) #Needs to be changed
+        x=self.unflatten(x)
         x=self.deconv1(x)
         x=self.unpool(x)
         x=self.deconv2(x)
