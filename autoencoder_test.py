@@ -29,13 +29,9 @@ class autoencoder(nn.Module):
 
     def encoder(self,x):
         x=F.relu(self.conv1(x))
-        #print(len(x[1][1][0]))
         x,index=self.maxpool(x)
-        #print(len(x[1][1][0]))
         x=F.relu(self.conv2(x))
-        #print(x.shape)
         x=torch.flatten(x,1)
-        #print(len(x[0]))
         return self.linear2(self.linear1(x)),index
 
     def decoder(self,x,index):
