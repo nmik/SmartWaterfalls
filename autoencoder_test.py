@@ -6,6 +6,20 @@ from torch import nn, optim
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torch.nn import functional as F
+import sys
+
+# DATASET CLASS TO AVOID USING TARGETS
+
+class UnlabeledTensorDataset(Dataset):
+    def __init__(self,data):
+        self.data = data
+        
+    def __getitem__(self, index):
+        x = self.data[index]
+        return x
+    
+    def __len__(self):
+        return len(self.data)
 
 
 #AUTOENCODER
@@ -29,10 +43,12 @@ class autoencoder(nn.Module):
 
     def encoder(self,x):
         x=F.relu(self.conv1(x))
+        #breakpoint()
         x,index=self.maxpool(x)
         x=F.relu(self.conv2(x))
         x=torch.flatten(x,1)
-        return self.linear2(self.linear1(x)),index
+        x=self.linear2(self.linear1(x))
+        return x,index
 
     def decoder(self,x,index):
         x=self.linear4(self.linear3(x))
