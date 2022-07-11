@@ -14,17 +14,34 @@ from autoencoder_test import *
 import sys
 
 
-model = autoencoder(in_channels=12)
+
+# --------------------------- Data loading  -----------------------------
+file_folder_path='./testdata/'
+RESHAPE = True
+
+dataset=load_grb_images(file_folder_path)
+
+if RESHAPE:
+    dataset_reshaped = []
+    for grb in dataset:
+        new_grb = resize_images(grb)
+        dataset_reshaped.append(new_grb)
+    dataset = dataset_reshaped
+    del dataset[2:]
+#del dataset[41] #It has 7500 columns instead of 9376
+else:
+    del dataset[2:]
+    
+print('Image x size:', dataset[0][0].shape[1])
+# -------------------------------------------------------------------
+
+
+# --------------------------- NN  param -----------------------------
+model = autoencoder(in_channels=12, n_e=10, xlen=dataset[0][0].shape[1], h1=10000)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
 EPOCHS=1
-file_folder_path='./testdata/'
-
-
-
-dataset=load_grb_images(file_folder_path)
-#del dataset[41] #It has 7500 columns instead of 9376
-del dataset[2:]
+# -------------------------------------------------------------------
 
 dataset=torch.tensor(np.array(dataset))
 trainset=UnlabeledTensorDataset(dataset)
