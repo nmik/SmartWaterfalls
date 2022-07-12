@@ -27,8 +27,7 @@ if RESHAPE:
         new_grb = resize_images(grb)
         dataset_reshaped.append(new_grb)
     dataset = dataset_reshaped
-    del dataset[2:]
-#del dataset[41] #It has 7500 columns instead of 9376
+    del dataset[41] #It has 7500 columns instead of 9376
 else:
     del dataset[2:]
     
@@ -55,7 +54,7 @@ for epoch in range(EPOCHS):
         outputs = model(data_.type(torch.FloatTensor))
         outputs=outputs.type(torch.DoubleTensor)
         train_loss = criterion(outputs, data_)
-        breakpoint()
+        # breakpoint()
         train_loss.backward()
         optimizer.step() #Long step
         # breakpoint()
