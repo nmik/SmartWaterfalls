@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import argparse
 import torch
 from torch import nn, optim
 import pandas as pd
@@ -14,20 +15,35 @@ from autoencoder_test import *
 import sys
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", "--datafolder", type=str, required=True,
+                    help = "Path to folder with the .npy files")
+parser.add_argument("-e", "--epochs", type=int, default=1,
+                    help = "Number of epochs for the training")
+args = parser.parse_args()
+
 
 # --------------------------- Data loading  -----------------------------
-file_folder_path='./testdata/'
+file_folder_path=args.datafolder
 RESHAPE = True
 
 dataset=load_grb_images(file_folder_path)
 
 if RESHAPE:
+    count = 0
+    badevents_ = []
     dataset_reshaped = []
-    for grb in dataset:
-        new_grb = resize_images(grb)
-        dataset_reshaped.append(new_grb)
+    for i, grb in enumerate(dataset):
+        if grb.shape[2] != 9376:
+            print('Nooooooooooooooooooooooooooooo', i, grb.shape[2])
+            count += 1
+            badevents_.append(i)
+        else:
+            new_grb = resize_images(grb)
+            dataset_reshaped.append(new_grb)
     dataset = dataset_reshaped
-    del dataset[41] #It has 7500 columns instead of 9376
+    print('Found bad events', count)
+    print(np.array(os.listdir(file_folder_path))[np.array(badevents_)])
 else:
     del dataset[2:]
     
@@ -39,7 +55,7 @@ print('Image x size:', dataset[0][0].shape[1])
 model = autoencoder(in_channels=12, n_e=10, xlen=dataset[0][0].shape[1], h1=10000)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
-EPOCHS=1
+EPOCHS=args.epochs
 # -------------------------------------------------------------------
 
 dataset=torch.tensor(np.array(dataset))
@@ -52,7 +68,7 @@ for epoch in range(EPOCHS):
     for data_ in trainloader:
         optimizer.zero_grad()
         outputs = model(data_.type(torch.FloatTensor))
-        outputs=outputs.type(torch.DoubleTensor)
+        outputs = outputs.type(torch.DoubleTensor)
         train_loss = criterion(outputs, data_)
         # breakpoint()
         train_loss.backward()
@@ -73,14 +89,24 @@ for epoch in range(EPOCHS):
 
 #Output image (first layer)
 
-#with torch.no_grad(): 
-#    outputs=outputs.type(torch.FloatTensor)
-#    tr=transforms.ToPILImage()                                                                                                                   
-#    plt.imshow(tr(outputs[0][0]),aspect='auto',cmap='viridis')
-#    plt.savefig('output_test_image_0')
-#    plt.close()
-
-
+with torch.no_grad(): 
+    # outputs = outputs.type(torch.FloatTensor)
+    trainloader_1 = DataLoader(trainset)
+    for data_ in trainloader:
+        outputs = model(data_.type(torch.FloatTensor))
+    tr=transforms.ToPILImage()
+    plt.figure()                                   
+    plt.title('Long hard')                                                                               
+    plt.imshow(tr(outputs[0][0]),aspect='auto',cmap='viridis')
+    plt.savefig('output_test_image_0')
+    plt.figure()     
+    plt.title('Mid hard')                                                                                                              
+    plt.imshow(tr(outputs[0][4]),aspect='auto',cmap='viridis')
+    plt.savefig('output_test_image_1')
+    plt.figure()    
+    plt.title('Short hard')                                                                                                               
+    plt.imshow(tr(outputs[0][8]),aspect='auto',cmap='viridis')
+    plt.savefig('output_test_image_2')
     
 print('----------------------------')
 print('Building LOSS plots...')
