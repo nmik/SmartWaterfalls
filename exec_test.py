@@ -52,7 +52,7 @@ print('Image x size:', dataset[0][0].shape[1])
 
 
 # --------------------------- NN  param -----------------------------
-model = autoencoder(in_channels=12, n_e=10, xlen=dataset[0][0].shape[1], h1=10000)
+model = autoencoder(in_channels=12, n_e=8, xlen=dataset[0][0].shape[1], h1=1024)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
 EPOCHS=args.epochs

@@ -28,17 +28,18 @@ class autoencoder(nn.Module):
     def __init__(self, in_channels, n_e=10, xlen=9376,h1=10000):
         super(autoencoder, self).__init__()
 
+        k2=int((xlen%8)/2.+3)
+
         self.conv1=nn.Conv2d(in_channels=in_channels, out_channels=in_channels*2, kernel_size=4, stride=2, padding=0)
-        self.maxpool=nn.MaxPool2d(kernel_size=(2,4), stride=(1,2), padding=0,return_indices=True)
+        self.maxpool=nn.MaxPool2d(kernel_size=(2,k2), stride=(1,2), padding=0,return_indices=True)
         self.conv2=nn.Conv2d(in_channels=in_channels*2, out_channels=in_channels*4, kernel_size=(2,3), stride=2, padding=0)
-        # self.linear1=nn.Linear(6*xlen-in_channels*4, h1)
-        self.linear1=nn.Linear(int((xlen/8 - 5/4)*in_channels*4), h1)
+        self.linear1=nn.Linear(int((xlen/8 - (1+k2)/4)*in_channels*4), h1)
         self.linear2=nn.Linear(h1, n_e)
         self.linear3=nn.Linear(n_e, h1)
-        self.linear4=nn.Linear(h1, int((xlen/8 - 5/4)*in_channels*4))
-        self.unflatten=nn.Unflatten(1, (in_channels*4,1,int(xlen/8-5/4)))
+        self.linear4=nn.Linear(h1, int((xlen/8 - (1+k2)/4)*in_channels*4))
+        self.unflatten=nn.Unflatten(1, (in_channels*4,1,int((xlen/8 - (1+k2)/4))))
         self.deconv1=nn.ConvTranspose2d(in_channels=in_channels*4, out_channels=in_channels*2, kernel_size=(2,3), stride=2, padding=0)
-        self.unpool=nn.MaxUnpool2d(kernel_size=(2,4), stride=(1,2), padding=0)
+        self.unpool=nn.MaxUnpool2d(kernel_size=(2,k2), stride=(1,2), padding=0)
         self.deconv2=nn.ConvTranspose2d(in_channels=in_channels*2, out_channels=in_channels, kernel_size=4, stride=2, padding=0)
 
 
