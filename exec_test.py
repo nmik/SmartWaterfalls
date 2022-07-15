@@ -35,7 +35,6 @@ if RESHAPE:
     dataset_reshaped = []
     for i, grb in enumerate(dataset):
         if grb.shape[2] != 9376:
-            print('Nooooooooooooooooooooooooooooo', i, grb.shape[2])
             count += 1
             badevents_.append(i)
         else:
@@ -43,24 +42,35 @@ if RESHAPE:
             dataset_reshaped.append(new_grb)
     dataset = dataset_reshaped
     print('Found bad events', count)
-    print(np.array(os.listdir(file_folder_path))[np.array(badevents_)])
+    if count != 0:
+        print(np.array(os.listdir(file_folder_path))[np.array(badevents_)])
 else:
-    del dataset[2:]
-    
+    count = 0
+    badevents_ = []
+    for i, grb in enumerate(dataset):
+        if grb.shape[2] != 9376:
+            count += 1
+            badevents_.append(i)
+        else:
+            pass
+    print('Found bad events', count)
+    if count != 0:
+        print(np.array(os.listdir(file_folder_path))[np.array(badevents_)])
+
 print('Image x size:', dataset[0][0].shape[1])
 # -------------------------------------------------------------------
 
 
 # --------------------------- NN  param -----------------------------
-model = autoencoder(in_channels=12, n_e=8, xlen=dataset[0][0].shape[1], h1=1024)
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+model = autoencoder(in_channels=12, n_e=9, xlen=dataset[0][0].shape[1], h1=512)
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.MSELoss()
 EPOCHS=args.epochs
 # -------------------------------------------------------------------
 
 dataset=torch.tensor(np.array(dataset))
 trainset=UnlabeledTensorDataset(dataset)
-trainloader=DataLoader(trainset,batch_size=8,shuffle=False)
+trainloader=DataLoader(trainset,batch_size=16,shuffle=False)
 
 loss_=[]
 for epoch in range(EPOCHS):
