@@ -62,8 +62,8 @@ print('Image x size:', dataset[0][0].shape[1])
 
 
 # --------------------------- NN  param -----------------------------
-model = autoencoder(in_channels=12, n_e=9, xlen=dataset[0][0].shape[1], h1=512)
-optimizer = optim.Adam(model.parameters(), lr=1e-4)
+model = autoencoder(in_channels=12, n_e=3, xlen=dataset[0][0].shape[1], h1=512)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
 EPOCHS=args.epochs
 # -------------------------------------------------------------------
@@ -99,11 +99,19 @@ for epoch in range(EPOCHS):
 
 #Output image (first layer)
 
+
 with torch.no_grad(): 
     # outputs = outputs.type(torch.FloatTensor)
     trainloader_1 = DataLoader(trainset)
-    for data_ in trainloader:
-        outputs = model(data_.type(torch.FloatTensor))
+    for i,data_ in enumerate(trainloader):
+        l_space=model.encoder(data_.type(torch.FloatTensor))[0]
+        if i == 0:
+            l_space_vector=l_space
+        else:
+            l_space_vector=torch.cat((l_space_vector,l_space),dim=0)
+
+
+    outputs = model(data_.type(torch.FloatTensor))
     tr=transforms.ToPILImage()
     f, (ax1,ax2) = plt.subplots(2, 1, sharex=True, figsize=(8,8))                                  
     ax1.set_title('Long hard reconstructed')                                                                               
@@ -133,6 +141,14 @@ plt.plot(range(EPOCHS), loss_, 'o--', label='Train Loss')
 plt.xlabel('EPOCH')
 plt.ylabel('LOSS')
 plt.savefig('Loss.png')
+plt.show()
+plt.close()
+
+print('----------------------------')
+print('Building latent space distribution plot...')
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.scatter(l_space_vector[:,0], l_space_vector[:,1], l_space_vector[:,2])
 plt.show()
 plt.close()
 
